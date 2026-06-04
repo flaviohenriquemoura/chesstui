@@ -1,0 +1,21 @@
+    Grid {
+        /* Define um grid estrito de 8 por 8 */
+        grid-size: 8 8;
+        /* Define a largura exata de cada coluna (3 caracteres) e altura (1 linha) */
+        grid-columns: 3 3 3 3 3 3 3 3;
+        grid-rows: 1 1 1 1 1 1 1 1;
+        
+        /* O SEGREDO: Remove qualquer espaçamento entre as linhas e colunas */
+        grid-gutter: 0;
+        
+        /* Centraliza o tabuleiro inteiro na tela do terminal */
+        align: center middle;
+        width: auto;
+        height: auto;
+    }
+
+    CasaTabuleiro {
+        width: 3;
+        height: 1;
+        content-align: center middle;
+    }
