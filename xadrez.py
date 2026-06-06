@@ -133,21 +133,39 @@ class Tabuleiro(App):
     def casa_clicada(self, event):
         casa = event.casa
 
+        if self.old_casa != None:
+            self.old_casa.remove_class("selected")
 
-        for c in self.query(CTabuleiro):
-            if "selected" in str(c.classes):
-                self.old_casa = c
-            c.remove_class("selected")
-
+        # se a casa for reselecionada, tira a seleção
         if self.old_casa == casa:
             casa.remove_class("selected")
         elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and self.jogo_tab.lance_legal(f"{self.old_casa.position}{casa.position}"):
 
-
+            # atualiza a casa com a peça escolhida
             casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True), justify="center"))
+ 
+ 
             casa.text = self.old_casa.text
+
+            # verifica se o rei está em xeque e adiciona/remove background
+            if self.jogo_tab.rei_xeque():
+                self.rei_preto.add_class("xeque") if self.w_turn else self.rei_branco.add_class("xeque")
+            else:
+                self.rei_branco.remove_class("xeque")
+                self.rei_preto.remove_class("xeque")
+
+
+            # atualiza a casa do rei, caso movido
+            if casa.text == REI:
+                if not self.w_turn:
+                  self.rei_preto = casa
+                else:
+                    self.rei_branco = casa
+
             casa.cor_fonte = self.old_casa.cor_fonte
             self.old_casa.update(Text(VAZIO, style=Style(color=casa.cor_fonte, bold=True), justify="center"))
+
+
             self.old_casa.text = VAZIO
             self.old_casa.cor_fonte = "white"
 
@@ -156,31 +174,19 @@ class Tabuleiro(App):
         else:
             self.old_casa = None
 
-        if self.old_casa != None:
-            self.query_one('.timew').update(self.old_casa.position+casa.position)
-
         if casa.text != VAZIO and self.old_casa == None and casa.cor_fonte == self.turn:
             casa.add_class("selected")
             self.old_casa = casa
 
-        self.old_casa = None
 
- 
-        if self.jogo_tab.rei_xeque():
-            self.rei_preto.add_class("xeque") if not self.w_turn else self.rei_branco.add_class("xeque")
-        else:
-            self.rei_branco.remove_class("xeque")
-            self.rei_preto.remove_class("xeque")
-        if casa.text == REI:
-            self.rei_preto = casa if self.w_turn else self.rei_preto
-            self.rei_branco = casa if not self.w_turn else self.rei_branco
+
 
     def relogio(self):
         if self.w_turn:
             minutos = self.tempow//60
             segundos = "00" if self.tempow%60 == 0 else self.tempow%60
             segundos = f"0{self.tempow%60}" if self.tempow%60 < 10 else self.tempow%60
-            self.query_one('.timew').update(Text(f"White: {minutos}:{segundos} {self.rei_branco.position}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
+            self.query_one('.timew').update(Text(f"White: {minutos}:{segundos}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
             self.tempow -=1
         else:
             minutos = self.tempob//60
