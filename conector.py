@@ -15,3 +15,6 @@ class JogoReal():
 def number_to_position(linha, coluna):
         fileiras = "abcdefgh"
         return f"{fileiras[linha+-1]}{coluna}"
+
+def position_to_number(position):
+    return [(ord(position[0])-96), int(position[1])]

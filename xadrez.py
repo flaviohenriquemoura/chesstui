@@ -51,13 +51,9 @@ PEAO = """
  ▄▇▄
  ▜█▛
 ▄███▄
-▔▔▔▔▔
- """
+▔▔▔▔▔"""
 
-VAZIO = """
-
-
-     """
+VAZIO = """"""
 
 
 ROWS = [
@@ -71,6 +67,26 @@ ROWS = [
     (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE)
 ]
 
+roques = [
+    'e1g1',
+    'e1c1',
+    'e8g8',
+    'e8c8'
+]
+
+t_roque_position = [
+    'f1',
+    'd1',
+    'f8',
+    'd8'
+]
+
+t_roque_orig = [
+    'h1',
+    'a1',
+    'h8',
+    'a8'
+]
 
 class CTabuleiro(Static):
     class Clique(events.Event):
@@ -136,10 +152,14 @@ class Tabuleiro(App):
         if self.old_casa != None:
             self.old_casa.remove_class("selected")
 
+        is_selected = False
+        move = f"{self.old_casa.position}{casa.position}" if self.old_casa != None else f"{casa.position}"
         # se a casa for reselecionada, tira a seleção
         if self.old_casa == casa:
             casa.remove_class("selected")
-        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and self.jogo_tab.lance_legal(f"{self.old_casa.position}{casa.position}"):
+            self.old_casa = None
+            is_selected = True
+        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and self.jogo_tab.lance_legal(f"{move}"):
 
             # atualiza a casa com a peça escolhida
             casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True), justify="center"))
@@ -162,6 +182,23 @@ class Tabuleiro(App):
                 else:
                     self.rei_branco = casa
 
+                if move in roques: # roque aqui
+                    torre_position = conector.position_to_number(t_roque_position[roques.index(move)]) 
+                    old_torre_position = conector.position_to_number(t_roque_orig[roques.index(move)])
+
+                    torre = self.buscar_casa(torre_position[0], torre_position[1])
+                    old_torre = self.buscar_casa(old_torre_position[0], old_torre_position[1])
+
+                    old_torre.update(Text(VAZIO, style=Style(color=casa.cor_fonte, bold=True), justify="center"))
+                    torre.update(Text(old_torre.text, style=Style(color=self.old_casa.cor_fonte, bold=True), justify="center"))
+
+
+                    torre.text = old_torre.text
+                    torre.cor_fonte = old_torre.cor_fonte
+
+                    old_torre.text = VAZIO
+                    old_torre.cor_fonte = "white"
+
             casa.cor_fonte = self.old_casa.cor_fonte
             self.old_casa.update(Text(VAZIO, style=Style(color=casa.cor_fonte, bold=True), justify="center"))
 
@@ -174,12 +211,16 @@ class Tabuleiro(App):
         else:
             self.old_casa = None
 
-        if casa.text != VAZIO and self.old_casa == None and casa.cor_fonte == self.turn:
+        if casa.text != VAZIO and self.old_casa == None and casa.cor_fonte == self.turn and not is_selected:
             casa.add_class("selected")
             self.old_casa = casa
 
 
-
+    def buscar_casa(self, linha, coluna):
+        for casa in self.query(CTabuleiro):
+            if casa.linha == linha and casa.coluna == coluna:
+                return casa
+        return None
 
     def relogio(self):
         if self.w_turn:
@@ -201,6 +242,7 @@ class Tabuleiro(App):
 
     def on_mount(self):
         self.set_interval(1, self.relogio)
+
 
 app = Tabuleiro()
 app.run()
