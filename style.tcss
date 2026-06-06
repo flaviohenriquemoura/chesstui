@@ -1,6 +1,6 @@
     Grid {
         grid-size: 8 8;
-        grid-columns: 10 11 11 11 11 11 11 11;
+        grid-columns: 10 10 10 10 10 10 10 10;
         grid-rows: 6 6 6 6 6 6 6 6;
         
         grid-gutter: 0;
@@ -11,7 +11,7 @@
     }
 
     CTabuleiro {
-        width: 11;
+        width: 10;
         height: 6;
         content-align: center middle;
 
@@ -42,4 +42,8 @@
 
 .selected {
     background: #829769;
+}
+
+.xeque {
+    background: #e0a5a5;
 }
