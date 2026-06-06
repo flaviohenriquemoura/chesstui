@@ -102,6 +102,8 @@ class Tabuleiro(App):
                     for j, peca in enumerate(fileira):
 
                         cor_fonte = "black" if i == 0 or i == 1 else "#ffffff"
+                        if peca == VAZIO:
+                            cor_fonte = "white"
                         cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
                     
                         classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
@@ -124,7 +126,9 @@ class Tabuleiro(App):
                 self.old_casa = c
             c.remove_class("selected")
 
-        if self.old_casa != None:
+        if self.old_casa == casa:
+            casa.remove_class("selected")
+        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte:
             casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True), justify="center"))
             casa.text = self.old_casa.text
             casa.cor_fonte = self.old_casa.cor_fonte
@@ -132,6 +136,9 @@ class Tabuleiro(App):
             self.old_casa.text = VAZIO
             self.turn = "black" if self.turn == "#ffffff" else "#ffffff"
             self.w_turn = False if self.w_turn else True
+        else:
+            self.old_casa = None
+
 
 
         if casa.text != VAZIO and self.old_casa == None and casa.cor_fonte == self.turn:
@@ -150,13 +157,15 @@ class Tabuleiro(App):
     
     def relogio(self):
         if self.w_turn:
-            minutos = f"{self.tempow/60:.0f}"
-            segundos = self.tempow%60
+            minutos = self.tempow//60
+            segundos = "00" if self.tempow%60 == 0 else self.tempow%60
+            segundos = f"0{self.tempow%60}" if self.tempow%60 < 10 else self.tempow%60
             self.query_one('.timew').update(Text(f"White: {minutos}:{segundos}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
             self.tempow -=1
         else:
-            minutos = f"{self.tempob/60:.0f}"
-            segundos = self.tempob%60
+            minutos = self.tempob//60
+            segundos = "00" if self.tempob%60 == 0 else self.tempob%60
+            segundos = f"0{self.tempob%60}" if self.tempob%60 < 10 else self.tempob%60
             self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos}", Style(color="#ffffff", bold=True), justify="center"))
             self.tempob -=1
 
