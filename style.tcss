@@ -1,7 +1,7 @@
     Grid {
-        grid-size: 8 8;
-        grid-columns: 10 10 10 10 10 10 10 10;
-        grid-rows: 6 6 6 6 6 6 6 6;
+        grid-size: 9 9;
+        grid-columns: 10 10 10 10 10 10 10 10 10;
+        grid-rows: 6 6 6 6 6 6 6 6 6;
         
         grid-gutter: 0;
         

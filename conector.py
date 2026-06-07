@@ -13,7 +13,7 @@ class JogoReal():
         return self.board.is_check()
 
 def number_to_position(linha, coluna):
-        fileiras = "abcdefgh"
+        fileiras = "abcdefghj"
         return f"{fileiras[linha+-1]}{coluna}"
 
 def position_to_number(position):

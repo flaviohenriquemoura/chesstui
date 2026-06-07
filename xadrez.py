@@ -57,14 +57,14 @@ VAZIO = """"""
 
 
 ROWS = [
-    (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE),
-    (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO),
-    (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO),
-    (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE)
+    (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE, VAZIO),
+    (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO, VAZIO),
+    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, RAINHA),
+    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, TORRE),
+    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, BISPO),
+    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, CAVALO),
+    (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO, VAZIO),
+    (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE, VAZIO)
 ]
 
 roques = [
@@ -88,6 +88,13 @@ t_roque_orig = [
     'a8'
 ]
 
+promo_dict = {
+    RAINHA: 'q',
+    TORRE: 'r',
+    BISPO: 'b',
+    CAVALO: 'n'
+}
+
 class CTabuleiro(Static):
     class Clique(events.Event):
         pass
@@ -105,9 +112,13 @@ class Tabuleiro(App):
     turn = "#ffffff"
     tempow = 600
     tempob = 600
-
+    promo = []
     w_turn = True
+    could_promo = False
+    promo_move = None
 
+    promo_old_casa = None
+    quero_ler = None
 
     rei_preto = None
     rei_branco = None
@@ -128,15 +139,27 @@ class Tabuleiro(App):
                         cor_fonte = "black" if i == 0 or i == 1 else "#ffffff"
                         if peca == VAZIO:
                             cor_fonte = "white"
-                        cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
+ 
+                        
+                        if j == 8:
+                            cor_fonte = "white"
+                            cell = Text(VAZIO, style=Style(color=cor_fonte, bold=True), justify="center")
+                        else:
+                            cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
 
                         classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
+
+                        classe_cor = "" if j == 8 else classe_cor
+
 
                         casa = CTabuleiro(cell, classes=classe_cor)
                         casa.coluna = (i-8)*-1
                         casa.linha = j+1
                         casa.text = peca
                         casa.cor_fonte = cor_fonte
+                        if casa.linha == 9:
+                            self.promo.append(casa)
+
                         casa.position = conector.number_to_position(casa.linha, casa.coluna)
                         if peca == REI:
                             self.rei_branco = casa if cor_fonte == "#ffffff" else self.rei_branco
@@ -148,18 +171,45 @@ class Tabuleiro(App):
     @on(CTabuleiro.Clique)
     def casa_clicada(self, event):
         casa = event.casa
+        self.promo_old_casa = [self.old_casa, casa] if self.old_casa != None else self.promo_old_casa
 
-        if self.old_casa != None:
-            self.old_casa.remove_class("selected")
 
         is_selected = False
         move = f"{self.old_casa.position}{casa.position}" if self.old_casa != None else f"{casa.position}"
+
+        if casa in self.promo and casa.text != VAZIO:
+            move = f"{self.promo_move}{promo_dict[casa.text]}"
+            if self.could_promo:
+                self.old_casa = self.promo_old_casa[0]
+                self.old_casa.text = casa.text
+                casa = self.promo_old_casa[1]
+
+#        self.quero_ler = f"{move} {self.old_casa} {casa.cor_fonte}" # estava usando para ler dados na tela
+
+        if self.old_casa == None:
+            for i in self.promo:
+                    i.update(Text(VAZIO, style=Style(color=i.cor_fonte, bold=True), justify="center"))
+
+        if self.old_casa != None:
+            self.old_casa.remove_class("selected")
+            self.old_casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True, blink=False), justify="center"))
+            conditional = ((self.promo_old_casa[0].position[0] == self.promo_old_casa[1].position[0] and self.promo_old_casa[1].text == VAZIO) or (self.promo_old_casa[0].position[0] != self.promo_old_casa[1].position[0]))
+            if (self.old_casa.text == PEAO and ((self.w_turn and move[-1] == "8")  or (not self.w_turn and move[-1] == "1"))) and conditional:
+ 
+                for i in self.promo:
+                    i.update(Text(i.text, style=Style(color=i.cor_fonte, bold=True), justify="center"))
+                self.could_promo = True
+            else:
+                for i in self.promo:
+                    i.update(Text(VAZIO, style=Style(color=i.cor_fonte, bold=True), justify="center"))
+                self.could_promo = False
+
         # se a casa for reselecionada, tira a seleção
         if self.old_casa == casa:
             casa.remove_class("selected")
             self.old_casa = None
             is_selected = True
-        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and self.jogo_tab.lance_legal(f"{move}"):
+        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and not 'j' in move and self.jogo_tab.lance_legal(f"{move}"):
 
             # atualiza a casa com a peça escolhida
             casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True), justify="center"))
@@ -213,8 +263,10 @@ class Tabuleiro(App):
 
         if casa.text != VAZIO and self.old_casa == None and casa.cor_fonte == self.turn and not is_selected:
             casa.add_class("selected")
+            casa.update(Text(casa.text, style=Style(color=casa.cor_fonte, bold=True, blink=True), justify="center"))
             self.old_casa = casa
 
+        self.promo_move = move
 
     def buscar_casa(self, linha, coluna):
         for casa in self.query(CTabuleiro):
@@ -227,13 +279,13 @@ class Tabuleiro(App):
             minutos = self.tempow//60
             segundos = "00" if self.tempow%60 == 0 else self.tempow%60
             segundos = f"0{self.tempow%60}" if self.tempow%60 < 10 else self.tempow%60
-            self.query_one('.timew').update(Text(f"White: {minutos}:{segundos}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
+            self.query_one('.timew').update(Text(f"White: {minutos}:{segundos} {self.quero_ler}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
             self.tempow -=1
         else:
             minutos = self.tempob//60
             segundos = "00" if self.tempob%60 == 0 else self.tempob%60
             segundos = f"0{self.tempob%60}" if self.tempob%60 < 10 else self.tempob%60
-            self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos}", Style(color="#ffffff", bold=True), justify="center"))
+            self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos} {self.quero_ler}", Style(color="#ffffff", bold=True), justify="center"))
             self.tempob -=1
 
 
