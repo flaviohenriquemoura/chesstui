@@ -1,7 +1,7 @@
 import chess
 from textual.app import App
-from textual.widgets import Static
-from textual.containers import Grid, Horizontal
+from textual.widgets import Static, Switch, Collapsible, Label
+from textual.containers import Grid, Horizontal, Vertical
 from textual import on, events
 from rich.style import Style
 from rich.text import Text
@@ -122,51 +122,65 @@ class Tabuleiro(App):
 
     rei_preto = None
     rei_branco = None
+    i_lance = 2
+    ord_lance = ""
 
     def compose(self):
 
+        with Vertical():
+            yield Static(Text("Black: 10:00", Style(color="#ffffff", bold=True), justify="center"), classes="timeb container")
 
-        yield Static(Text("Black: 10:00", Style(color="#ffffff", bold=True), justify="center"), classes="timeb")
 
+            with Horizontal():
 
-        with Horizontal():
+                with Grid(classes="container"):
+                    for i, fileira in enumerate(ROWS):
 
-            with Grid():
-                for i, fileira in enumerate(ROWS):
+                        for j, peca in enumerate(fileira):
 
-                    for j, peca in enumerate(fileira):
-
-                        cor_fonte = "black" if i == 0 or i == 1 else "#ffffff"
-                        if peca == VAZIO:
-                            cor_fonte = "white"
+                            cor_fonte = "black" if i == 0 or i == 1 else "#ffffff"
+                            if peca == VAZIO:
+                                cor_fonte = "white"
  
                         
-                        if j == 8:
-                            cor_fonte = "white"
-                            cell = Text(VAZIO, style=Style(color=cor_fonte, bold=True), justify="center")
-                        else:
-                            cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
+                            if j == 8:
+                                cor_fonte = "white"
+                                cell = Text(VAZIO, style=Style(color=cor_fonte, bold=True), justify="center")
+                            else:
+                                cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
 
-                        classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
+                            classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
 
-                        classe_cor = "" if j == 8 else classe_cor
+                            classe_cor = "" if j == 8 else classe_cor
 
 
-                        casa = CTabuleiro(cell, classes=classe_cor)
-                        casa.coluna = (i-8)*-1
-                        casa.linha = j+1
-                        casa.text = peca
-                        casa.cor_fonte = cor_fonte
-                        if casa.linha == 9:
-                            self.promo.append(casa)
+                            casa = CTabuleiro(cell, classes=classe_cor)
+                            casa.coluna = (i-8)*-1
+                            casa.linha = j+1
+                            casa.text = peca
+                            casa.cor_fonte = cor_fonte
+                            if casa.linha == 9:
+                                self.promo.append(casa)
 
-                        casa.position = conector.number_to_position(casa.linha, casa.coluna)
-                        if peca == REI:
-                            self.rei_branco = casa if cor_fonte == "#ffffff" else self.rei_branco
-                            self.rei_preto = casa if cor_fonte == "black" else self.rei_preto
+                            casa.position = conector.number_to_position(casa.linha, casa.coluna)
+                            if peca == REI:
+                                self.rei_branco = casa if cor_fonte == "#ffffff" else self.rei_branco
+                                self.rei_preto = casa if cor_fonte == "black" else self.rei_preto
 
-                        yield casa
-        yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew")
+                            yield casa
+                
+                with Collapsible(title="Ordem dos lances:", classes="info"):
+                    yield Label("", classes="label lances")
+
+            yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
+
+            
+            yield Horizontal(
+                Static("Auto-flip:", classes="label"),
+                Switch(animate=False), classes="container flip"
+                )
+
+
 
     @on(CTabuleiro.Clique)
     def casa_clicada(self, event):
@@ -255,6 +269,15 @@ class Tabuleiro(App):
 
             self.old_casa.text = VAZIO
             self.old_casa.cor_fonte = "white"
+
+
+
+            if self.w_turn:
+                self.ord_lance += f"{self.i_lance//2}.{self.jogo_tab.lance} "
+            else:
+                self.ord_lance += f"{self.jogo_tab.lance} "
+            self.i_lance += 1
+            self.query_one(".lances").update(self.ord_lance)
 
             self.turn = "black" if self.turn == "#ffffff" else "#ffffff"
             self.w_turn = False if self.w_turn else True

@@ -8,12 +8,16 @@
         align: center middle;
         width: 100%;
         height: 100%;
+        margin: 0;
+        padding: 0;
     }
 
     CTabuleiro {
         width: 10;
         height: 6;
         content-align: center middle;
+        margin: 0;
+        padding: 0;
 
 
  }
@@ -35,9 +39,10 @@
 
 .timew {
 	width: auto;
-	height: auto;
+	height: 3;
 
 	margin: 0;
+    padding-left: 10;
 }
 
 .selected {
@@ -46,4 +51,26 @@
 
 .xeque {
     background: #e0a5a5;
+}
+
+.label {
+    height: 3;
+    content-align: center middle;
+    width: auto;
+}
+
+.container {
+    height: auto;
+    width: auto;
+    padding-left:10;
+}
+
+.lances {
+    width: 40%;
+    height: auto;
+}
+
+.info {
+    width: 20%;
+    height: auto
 }
