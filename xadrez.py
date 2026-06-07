@@ -40,7 +40,7 @@ REI = """
 """
 
 
-RAINHA = """
+DAMA = """
 ▐╻█╻█╻▌
 ▝▜███▛▘
  ▟███▙
@@ -60,14 +60,14 @@ VAZIO = """"""
 
 
 ROWS = [
-    (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE, VAZIO),
+    (TORRE, CAVALO, BISPO, DAMA, REI, BISPO, CAVALO, TORRE, VAZIO),
     (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO, VAZIO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, RAINHA),
+    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, DAMA),
     (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, TORRE),
     (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, BISPO),
     (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, CAVALO),
     (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO, VAZIO),
-    (TORRE, CAVALO, BISPO, RAINHA, REI, BISPO, CAVALO, TORRE, VAZIO)
+    (TORRE, CAVALO, BISPO, DAMA, REI, BISPO, CAVALO, TORRE, VAZIO)
 ]
 
 roques = [
@@ -92,7 +92,7 @@ t_roque_orig = [
 ]
 
 promo_dict = {
-    RAINHA: 'q',
+    DAMA: 'q',
     TORRE: 'r',
     BISPO: 'b',
     CAVALO: 'n'
@@ -282,9 +282,9 @@ class Tabuleiro(App):
 
 
             if self.w_turn:
-                self.ord_lance += f"{self.i_lance//2}.{self.jogo_tab.lance} "
+                self.ord_lance += f"{self.i_lance//2}.{VAZIO:<1}{self.jogo_tab.lance:<8} "
             else:
-                self.ord_lance += f"{self.jogo_tab.lance} "
+                self.ord_lance += f"{self.jogo_tab.lance}\n"
             self.i_lance += 1
             self.query_one(".lances").update(self.ord_lance)
 
