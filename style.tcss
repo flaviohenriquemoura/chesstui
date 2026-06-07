@@ -74,3 +74,12 @@
     width: 20%;
     height: auto
 }
+
+
+.lastcasa{
+    background: #aaa23a;
+}
+
+.nowcasa {
+    background: #cdd26a;
+}

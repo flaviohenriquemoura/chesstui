@@ -39,10 +39,11 @@ REI = """
   ▀▀▀▀▀
 """
 
-RAINHA = """
 
-▐▙▟█▙▟▌
- ▜███▛
+RAINHA = """
+▐╻█╻█╻▌
+▝▜███▛▘
+ ▟███▙
  ▗███▖
 ▝▀▀▀▀▀▘
 """
@@ -52,6 +53,8 @@ PEAO = """
  ▜█▛
 ▄███▄
 ▔▔▔▔▔"""
+
+
 
 VAZIO = """"""
 
@@ -124,6 +127,7 @@ class Tabuleiro(App):
     rei_branco = None
     i_lance = 2
     ord_lance = ""
+    old_move = None
 
     def compose(self):
 
@@ -147,7 +151,7 @@ class Tabuleiro(App):
                                 cor_fonte = "white"
                                 cell = Text(VAZIO, style=Style(color=cor_fonte, bold=True), justify="center")
                             else:
-                                cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
+                                cell = Text.from_markup(peca, style=Style(color=cor_fonte, bold=True), justify="center")
 
                             classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
 
@@ -226,6 +230,9 @@ class Tabuleiro(App):
         elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and not 'j' in move and self.jogo_tab.lance_legal(f"{move}"):
 
             # atualiza a casa com a peça escolhida
+            self.old_move[0].remove_class("lastcasa") if self.old_move != None else []
+            self.old_move[1].remove_class("nowcasa") if self.old_move != None else []
+            self.old_move = [self.old_casa, casa]
             casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True), justify="center"))
  
  
@@ -269,6 +276,8 @@ class Tabuleiro(App):
 
             self.old_casa.text = VAZIO
             self.old_casa.cor_fonte = "white"
+            self.promo_old_casa[0].add_class("lastcasa")
+            self.promo_old_casa[1].add_class("nowcasa")
 
 
 
