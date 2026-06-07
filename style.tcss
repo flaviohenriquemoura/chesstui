@@ -55,7 +55,7 @@
 
 .label {
     height: 3;
-    content-align: center middle;
+    content-align: left top;
     width: auto;
 }
 
@@ -66,13 +66,16 @@
 }
 
 .lances {
-    width: auto;
+    width: 20;
     height: auto;
+    background: $surface;
+    padding: 1;
 }
 
 .info {
-    width: 20%;
-    height: auto
+    width: auto;
+    height: auto;
+    min-width: 30; 
 }
 
 
@@ -82,4 +85,10 @@
 
 .nowcasa {
     background: #cdd26a;
+}
+
+.rolavel {
+    height: 30;
+    padding: 1;
+    margin: 0;
 }

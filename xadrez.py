@@ -1,7 +1,7 @@
 import chess
 from textual.app import App
 from textual.widgets import Static, Switch, Collapsible, Label
-from textual.containers import Grid, Horizontal, Vertical
+from textual.containers import Grid, Horizontal, Vertical, VerticalScroll
 from textual import on, events
 from rich.style import Style
 from rich.text import Text
@@ -70,6 +70,26 @@ ROWS = [
     (TORRE, CAVALO, BISPO, DAMA, REI, BISPO, CAVALO, TORRE, VAZIO)
 ]
 
+GAME_OVER = """
+ ▗▄▄▖ ▗▄▖ ▗▖  ▗▖▗▄▄▄▖ 
+▐▌   ▐▌ ▐▌▐▛▚▞▜▌▐▌       
+▐▌▝▜▌▐▛▀▜▌▐▌  ▐▌▐▛▀▀▘    
+▝▚▄▞▘▐▌ ▐▌▐▌  ▐▌▐▙▄▄▖    
+ ▗▄▖ ▗▖  ▗▖▗▄▄▄▖▗▄▄▖ 
+▐▌ ▐▌▐▌  ▐▌▐▌   ▐▌ ▐▌
+▐▌ ▐▌▐▌  ▐▌▐▛▀▀▘▐▛▀▚▖
+▝▚▄▞▘ ▝▚▞▘ ▐▙▄▄▖▐▌ ▐▌
+"""
+
+WINS = """
+▗▖ ▗▖▗▄▄▄▖▗▖  ▗▖ ▗▄▄▖
+▐▌ ▐▌  █  ▐▛▚▖▐▌▐▌   
+▐▌ ▐▌  █  ▐▌ ▝▜▌ ▝▀▚▖
+▐▙█▟▌▗▄█▄▖▐▌  ▐▌▗▄▄▞▘                  
+"""
+
+
+
 roques = [
     'e1g1',
     'e1c1',
@@ -97,6 +117,7 @@ promo_dict = {
     BISPO: 'b',
     CAVALO: 'n'
 }
+
 
 class CTabuleiro(Static):
     class Clique(events.Event):
@@ -151,7 +172,7 @@ class Tabuleiro(App):
                                 cor_fonte = "white"
                                 cell = Text(VAZIO, style=Style(color=cor_fonte, bold=True), justify="center")
                             else:
-                                cell = Text.from_markup(peca, style=Style(color=cor_fonte, bold=True), justify="center")
+                                cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
 
                             classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
 
@@ -173,8 +194,13 @@ class Tabuleiro(App):
 
                             yield casa
                 
-                with Collapsible(title="Ordem dos lances:", classes="info"):
-                    yield Label("", classes="label lances")
+                with Vertical():
+                    with VerticalScroll(classes="rolavel"):
+                        with Collapsible(title="Ordem dos lances:", classes="info"):
+                            yield Label("1. ", classes="label lances")
+
+#                    yield(Static(Text(GAME_OVER, style=Style(color="red", bold=True))))
+#                    yield(Static(Text(WINS, style=Style(color="green", bold=True))))
 
             yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
 
