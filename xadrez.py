@@ -6,117 +6,7 @@ from textual import on, events
 from rich.style import Style
 from rich.text import Text
 import conector
-
-TORRE = """
-▐█▄█▄█▌
-▝▜███▛▘
-  ███
- ▟███▙
-▝▀▀▀▀▀▘
-"""
-
-CAVALO = """
-  ▄▟▟▖
- ▟▛███▖
-▝▀▜███▊
- ▗███▛
- ▀▀▀▀▀
- """
-
-BISPO = """
-▗▅  ▖
-██▍ █
-███▍█
-▝███▘
-▀▀▀▀▀
-"""
-
-REI = """
-  ▂▃╋▃▂
- ▐█████▋
-  ▜███▛
-   ▟█▙
-  ▀▀▀▀▀
-"""
-
-
-DAMA = """
-▐╻█╻█╻▌
-▝▜███▛▘
- ▟███▙
- ▗███▖
-▝▀▀▀▀▀▘
-"""
-
-PEAO = """
- ▄▇▄
- ▜█▛
-▄███▄
-▔▔▔▔▔"""
-
-
-
-VAZIO = """"""
-
-
-ROWS = [
-    (TORRE, CAVALO, BISPO, DAMA, REI, BISPO, CAVALO, TORRE, VAZIO),
-    (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO, VAZIO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, DAMA),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, TORRE),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, BISPO),
-    (VAZIO, VAZIO,  VAZIO, VAZIO, VAZIO,  VAZIO, VAZIO,  VAZIO, CAVALO),
-    (PEAO,  PEAO,   PEAO,  PEAO, PEAO,   PEAO,  PEAO,   PEAO, VAZIO),
-    (TORRE, CAVALO, BISPO, DAMA, REI, BISPO, CAVALO, TORRE, VAZIO)
-]
-
-GAME_OVER = """
- ▗▄▄▖ ▗▄▖ ▗▖  ▗▖▗▄▄▄▖ 
-▐▌   ▐▌ ▐▌▐▛▚▞▜▌▐▌       
-▐▌▝▜▌▐▛▀▜▌▐▌  ▐▌▐▛▀▀▘    
-▝▚▄▞▘▐▌ ▐▌▐▌  ▐▌▐▙▄▄▖    
- ▗▄▖ ▗▖  ▗▖▗▄▄▄▖▗▄▄▖ 
-▐▌ ▐▌▐▌  ▐▌▐▌   ▐▌ ▐▌
-▐▌ ▐▌▐▌  ▐▌▐▛▀▀▘▐▛▀▚▖
-▝▚▄▞▘ ▝▚▞▘ ▐▙▄▄▖▐▌ ▐▌
-"""
-
-WINS = """
-▗▖ ▗▖▗▄▄▄▖▗▖  ▗▖ ▗▄▄▖
-▐▌ ▐▌  █  ▐▛▚▖▐▌▐▌   
-▐▌ ▐▌  █  ▐▌ ▝▜▌ ▝▀▚▖
-▐▙█▟▌▗▄█▄▖▐▌  ▐▌▗▄▄▞▘                  
-"""
-
-
-
-roques = [
-    'e1g1',
-    'e1c1',
-    'e8g8',
-    'e8c8'
-]
-
-t_roque_position = [
-    'f1',
-    'd1',
-    'f8',
-    'd8'
-]
-
-t_roque_orig = [
-    'h1',
-    'a1',
-    'h8',
-    'a8'
-]
-
-promo_dict = {
-    DAMA: 'q',
-    TORRE: 'r',
-    BISPO: 'b',
-    CAVALO: 'n'
-}
+from piece import *
 
 
 class CTabuleiro(Static):
@@ -134,8 +24,8 @@ class Tabuleiro(App):
     jogo_tab = conector.JogoReal()
     old_casa = None
     turn = "#ffffff"
-    tempow = 600
-    tempob = 600
+    tempoW = 600
+    tempoB = 600
     promo = []
     w_turn = True
     could_promo = False
@@ -237,8 +127,8 @@ class Tabuleiro(App):
         if self.old_casa != None:
             self.old_casa.remove_class("selected")
             self.old_casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True, blink=False), justify="center"))
-            conditional = ((self.promo_old_casa[0].position[0] == self.promo_old_casa[1].position[0] and self.promo_old_casa[1].text == VAZIO) or (self.promo_old_casa[0].position[0] != self.promo_old_casa[1].position[0]))
-            if (self.old_casa.text == PEAO and ((self.w_turn and move[-1] == "8")  or (not self.w_turn and move[-1] == "1"))) and conditional:
+            conditional = ((self.promo_old_casa[0].position[0] == self.promo_old_casa[1].position[0] and self.promo_old_casa[1].text == VAZIO) or (self.promo_old_casa[0].position[0] != self.promo_old_casa[1].position[0] and self.promo_old_casa[1].text != VAZIO))
+            if (self.old_casa.text == PEAO and ((self.w_turn and move[-1] == "8" and self.old_casa.position[-1] == "7")  or (not self.w_turn and move[-1] == "1" and self.old_casa.position[-1] == "2"))) and conditional:
  
                 for i in self.promo:
                     i.update(Text(i.text, style=Style(color=i.cor_fonte, bold=True), justify="center"))
@@ -249,6 +139,7 @@ class Tabuleiro(App):
                 self.could_promo = False
 
         # se a casa for reselecionada, tira a seleção
+
         if self.old_casa == casa:
             casa.remove_class("selected")
             self.old_casa = None
@@ -326,6 +217,8 @@ class Tabuleiro(App):
 
         self.promo_move = move
 
+#        self.inverte_tabuleiro()
+
     def buscar_casa(self, linha, coluna):
         for casa in self.query(CTabuleiro):
             if casa.linha == linha and casa.coluna == coluna:
@@ -334,21 +227,28 @@ class Tabuleiro(App):
 
     def relogio(self):
         if self.w_turn:
-            minutos = self.tempow//60
-            segundos = "00" if self.tempow%60 == 0 else self.tempow%60
-            segundos = f"0{self.tempow%60}" if self.tempow%60 < 10 else self.tempow%60
+            minutos = self.tempoW//60
+            segundos = "00" if self.tempoW%60 == 0 else self.tempoW%60
+            segundos = f"0{self.tempoW%60}" if self.tempoW%60 < 10 else self.tempoW%60
             self.query_one('.timew').update(Text(f"White: {minutos}:{segundos} {self.quero_ler}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
-            self.tempow -=1
+            self.tempoW -=1
         else:
-            minutos = self.tempob//60
-            segundos = "00" if self.tempob%60 == 0 else self.tempob%60
-            segundos = f"0{self.tempob%60}" if self.tempob%60 < 10 else self.tempob%60
+            minutos = self.tempoB//60
+            segundos = "00" if self.tempoB%60 == 0 else self.tempoB%60
+            segundos = f"0{self.tempoB%60}" if self.tempoB%60 < 10 else self.tempoB%60
             self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos} {self.quero_ler}", Style(color="#ffffff", bold=True), justify="center"))
-            self.tempob -=1
-
+            self.tempoB -=1
 
     def inverte_tabuleiro(self):
-        pass
+        copy_board = list(self.query(CTabuleiro))
+        for casinha in copy_board:
+            if casinha.position[0] == "j" or casinha.position[1] == 9:
+                copy_board.remove(casinha)
+            else:
+                self.ord_lance += f" {casinha.position}"
+        for i, casa in enumerate(copy_board):
+            casa.update(Text(copy_board[-i-1].text, style=Style(color=copy_board[-i-1].cor_fonte, bold=True), justify="center"))
+        return None
 
     def on_mount(self):
         self.set_interval(1, self.relogio)
