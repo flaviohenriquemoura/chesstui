@@ -19,6 +19,16 @@ class CTabuleiro(Static):
         message.casa = self
         self.post_message(message)
 
+class Cpromo(Static):
+    class Clique(events.Event):
+        pass
+
+    def on_click(self, event: events.Click):
+        event.stop()
+        message = self.Clique()
+        message.casa = self
+        self.post_message(message)
+
 class Tabuleiro(App):
     CSS_PATH = "style.tcss"
     jogo_tab = conector.JogoReal()
@@ -40,6 +50,9 @@ class Tabuleiro(App):
     ord_lance = ""
     old_move = None
 
+    inverter = False
+
+
     def compose(self):
 
         with Vertical():
@@ -48,7 +61,7 @@ class Tabuleiro(App):
 
             with Horizontal():
 
-                with Grid(classes="container"):
+                with Grid(classes="container tab"):
                     for i, fileira in enumerate(ROWS):
 
                         for j, peca in enumerate(fileira):
@@ -58,15 +71,10 @@ class Tabuleiro(App):
                                 cor_fonte = "white"
  
                         
-                            if j == 8:
-                                cor_fonte = "white"
-                                cell = Text(VAZIO, style=Style(color=cor_fonte, bold=True), justify="center")
-                            else:
-                                cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
+
+                            cell = Text(peca, style=Style(color=cor_fonte, bold=True), justify="center")
 
                             classe_cor = "casa-clara" if (i + j) % 2 == 0 else "casa-escura"
-
-                            classe_cor = "" if j == 8 else classe_cor
 
 
                             casa = CTabuleiro(cell, classes=classe_cor)
@@ -74,8 +82,8 @@ class Tabuleiro(App):
                             casa.linha = j+1
                             casa.text = peca
                             casa.cor_fonte = cor_fonte
-                            if casa.linha == 9:
-                                self.promo.append(casa)
+#                            if casa.linha == 9:
+#                                self.promo.append(casa)
 
                             casa.position = conector.number_to_position(casa.linha, casa.coluna)
                             if peca == REI:
@@ -83,6 +91,17 @@ class Tabuleiro(App):
                                 self.rei_preto = casa if cor_fonte == "black" else self.rei_preto
 
                             yield casa
+#                with Grid():
+                with Horizontal():
+                    with Grid(classes="pecas_promo"):
+                        for pecas in [DAMA, TORRE, BISPO, CAVALO]:
+                            peca = Cpromo(Text(VAZIO, style=Style(color="white", bold=True)), classes="peca")
+                            peca.cor_fonte = "white"
+                            peca.text = pecas
+                            self.promo.append(peca)
+                            yield peca
+#                    for i in self.query(".pecas_promo"):
+#                        self.promo.append(i)
                 
                 with Vertical():
                     with VerticalScroll(classes="rolavel"):
@@ -95,12 +114,18 @@ class Tabuleiro(App):
             yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
 
             
-            yield Horizontal(
-                Static("Auto-flip:", classes="label"),
-                Switch(animate=False), classes="container flip"
-                )
+            with Horizontal(classes="container flip"):
+
+                yield Static("Auto-flip:", classes="label")
+                self.switch = Switch(animate=False)
+                yield self.switch
 
 
+    @on(Cpromo.Clique)
+    def promo_clique(self, event):
+        self.could_promo = True
+        self.casa_clicada(event)
+        pass
 
     @on(CTabuleiro.Clique)
     def casa_clicada(self, event):
@@ -109,16 +134,17 @@ class Tabuleiro(App):
 
 
         is_selected = False
-        move = f"{self.old_casa.position}{casa.position}" if self.old_casa != None else f"{casa.position}"
+        if not casa in self.promo:
+            move = f"{self.old_casa.position}{casa.position}" if self.old_casa != None else f"{casa.position}"
 
-        if casa in self.promo and casa.text != VAZIO:
+        elif casa.text != VAZIO:
             move = f"{self.promo_move}{promo_dict[casa.text]}"
             if self.could_promo:
                 self.old_casa = self.promo_old_casa[0]
                 self.old_casa.text = casa.text
                 casa = self.promo_old_casa[1]
 
-#        self.quero_ler = f"{move} {self.old_casa} {casa.cor_fonte}" # estava usando para ler dados na tela
+#        self.quero_ler = f"{casa.cor_fonte} {self.turn}" # estava usando para ler dados na tela
 
         if self.old_casa == None:
             for i in self.promo:
@@ -127,9 +153,8 @@ class Tabuleiro(App):
         if self.old_casa != None:
             self.old_casa.remove_class("selected")
             self.old_casa.update(Text(self.old_casa.text, style=Style(color=self.old_casa.cor_fonte, bold=True, blink=False), justify="center"))
-            conditional = ((self.promo_old_casa[0].position[0] == self.promo_old_casa[1].position[0] and self.promo_old_casa[1].text == VAZIO) or (self.promo_old_casa[0].position[0] != self.promo_old_casa[1].position[0] and self.promo_old_casa[1].text != VAZIO))
-            if (self.old_casa.text == PEAO and ((self.w_turn and move[-1] == "8" and self.old_casa.position[-1] == "7")  or (not self.w_turn and move[-1] == "1" and self.old_casa.position[-1] == "2"))) and conditional:
- 
+
+            if self.old_casa.text == PEAO and self.jogo_tab.lance_legal(f"{move}q"):
                 for i in self.promo:
                     i.update(Text(i.text, style=Style(color=i.cor_fonte, bold=True), justify="center"))
                 self.could_promo = True
@@ -144,8 +169,10 @@ class Tabuleiro(App):
             casa.remove_class("selected")
             self.old_casa = None
             is_selected = True
-        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and not 'j' in move and self.jogo_tab.lance_legal(f"{move}"):
+        elif self.old_casa != None and self.old_casa.cor_fonte != casa.cor_fonte and self.jogo_tab.lance_legal(f"{move}"):
 
+
+            self.jogo_tab.fazer_lance(move)
             # atualiza a casa com a peça escolhida
             self.old_move[0].remove_class("lastcasa") if self.old_move != None else []
             self.old_move[1].remove_class("nowcasa") if self.old_move != None else []
@@ -198,6 +225,9 @@ class Tabuleiro(App):
 
 
 
+            if self.switch.value:
+                self.inverte_tabuleiro()
+
             if self.w_turn:
                 self.ord_lance += f"{self.i_lance//2}.{VAZIO:<1}{self.jogo_tab.lance:<8} "
             else:
@@ -207,6 +237,8 @@ class Tabuleiro(App):
 
             self.turn = "black" if self.turn == "#ffffff" else "#ffffff"
             self.w_turn = False if self.w_turn else True
+ 
+
         else:
             self.old_casa = None
 
@@ -217,7 +249,8 @@ class Tabuleiro(App):
 
         self.promo_move = move
 
-#        self.inverte_tabuleiro()
+
+
 
     def buscar_casa(self, linha, coluna):
         for casa in self.query(CTabuleiro):
@@ -241,14 +274,50 @@ class Tabuleiro(App):
 
     def inverte_tabuleiro(self):
         copy_board = list(self.query(CTabuleiro))
-        for casinha in copy_board:
-            if casinha.position[0] == "j" or casinha.position[1] == 9:
-                copy_board.remove(casinha)
-            else:
-                self.ord_lance += f" {casinha.position}"
-        for i, casa in enumerate(copy_board):
-            casa.update(Text(copy_board[-i-1].text, style=Style(color=copy_board[-i-1].cor_fonte, bold=True), justify="center"))
-        return None
+        n = len(copy_board)
+
+        for i in range(n//2):
+            cpy_casa_antiga = copy_board[i]
+            cpy_casa_nova = copy_board[n-i-1]
+
+            cpy_casa_antiga.text, cpy_casa_nova.text = cpy_casa_nova.text, cpy_casa_antiga.text
+            cpy_casa_antiga.cor_fonte, cpy_casa_nova.cor_fonte = cpy_casa_nova.cor_fonte, cpy_casa_antiga.cor_fonte
+
+            cpy_casa_antiga.position, cpy_casa_nova.position = cpy_casa_nova.position, cpy_casa_antiga.position
+            cpy_casa_antiga.linha, cpy_casa_nova.linha = cpy_casa_nova.linha, cpy_casa_antiga.linha
+            cpy_casa_antiga.coluna, cpy_casa_nova.coluna = cpy_casa_nova.coluna, cpy_casa_antiga.coluna
+
+            cpy_casa_antiga.update(Text(cpy_casa_antiga.text, style=Style(color=cpy_casa_antiga.cor_fonte, bold=True), justify="center"))
+            cpy_casa_nova.update(Text(cpy_casa_nova.text, style=Style(color=cpy_casa_nova.cor_fonte, bold=True), justify="center"))
+
+            cpy_casa_antiga.remove_class("lastcasa")
+            cpy_casa_antiga.remove_class("nowcasa")
+            cpy_casa_nova.remove_class("lastcasa")
+            cpy_casa_nova.remove_class("nowcasa")
+            if cpy_casa_antiga == self.promo_old_casa[0]:
+                cpy_casa_antiga.remove_class("lastcasa")
+                cpy_casa_nova.add_class("lastcasa")
+
+            elif cpy_casa_nova == self.promo_old_casa[0]:
+                cpy_casa_nova.remove_class("lastcasa")
+                cpy_casa_antiga.add_class("lastcasa")
+
+            if cpy_casa_antiga == self.promo_old_casa[1]:
+                cpy_casa_antiga.remove_class("nowcasa")
+                cpy_casa_nova.add_class("nowcasa")
+            elif cpy_casa_nova == self.promo_old_casa[1]:
+                cpy_casa_nova.remove_class("nowcasa")
+                cpy_casa_antiga.add_class("nowcasa")
+
+
+#            self.quero_ler = f"{self.rei_branco.position}, {self.rei_preto.position}"
+
+
+#        cpy_casa_nova.cor_fonte = casa.cor_fonte
+
+            
+#        self.turn = "black" if self.turn == "#ffffff" else "#ffffff"
+
 
     def on_mount(self):
         self.set_interval(1, self.relogio)

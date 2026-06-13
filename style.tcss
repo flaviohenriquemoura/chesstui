@@ -1,27 +1,43 @@
-    Grid {
-        grid-size: 9 9;
-        grid-columns: 10 10 10 10 10 10 10 10 10;
-        grid-rows: 6 6 6 6 6 6 6 6 6;
+.tab {
+    grid-size: 8 8;
+    grid-columns: 10 10 10 10 10 10 10 10;
+    grid-rows: 6 6 6 6 6 6 6;
         
-        grid-gutter: 0;
+    grid-gutter: 0;
         
-        align: center middle;
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
+    align: center middle;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
 
     }
 
-    CTabuleiro {
-        width: 10;
-        height: 6;
-        content-align: center middle;
-        margin: 0;
-        padding: 0;
+CTabuleiro {
+    width: 10;
+    height: 6;
+    content-align: center middle;
+    margin: 0;
+    padding: 0;
 
 
  }
+
+.pecas_promo {
+    grid-size: 1 4;
+    grid-columns: 8;
+    grid-rows: 6 6 6 6;
+        
+    grid-gutter: 0;
+        
+    align: center middle;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    margin-bottom:10;
+    width: 10;
+}
 
 .casa-clara {
     background: #f0d9b5;
