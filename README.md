@@ -6,7 +6,7 @@ A terminal-based chess game built in Python, with a text user interface powered 
 
 ## Demo
 
-<img src="https://github.com/flaviohenriquemoura/chesstui/blob/main/img/demo.jpg" width="384">
+<img src="https://github.com/flaviohenriquemoura/chesstui/blob/main/img/demo.gif" width="1024">
 
 ---
 
