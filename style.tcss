@@ -25,18 +25,17 @@ CTabuleiro {
 
 .pecas_promo {
     grid-size: 1 4;
-    grid-columns: 8;
-    grid-rows: 6 6 6 6;
+    grid-columns: 7;
+    grid-rows: 7 7 7 7;
         
     grid-gutter: 0;
         
     align: center middle;
-    width: 100%;
-    height: 100%;
+
     margin: 0;
     padding: 0;
-    margin-bottom:10;
-    width: 10;
+    margin-left:1;
+    width: 7;
 }
 
 .casa-clara {
@@ -51,14 +50,16 @@ CTabuleiro {
 .timeb{
 	width: auto;
 	height: auto;
+    padding: 0;
 	margin: 0;
 }
 
 .timew {
 	width: auto;
-	height: 3;
+	height: auto;
 
 	margin: 0;
+    padding: 0;
     padding-left: 10;
 }
 
@@ -87,12 +88,13 @@ CTabuleiro {
     height: auto;
     background: $surface;
     padding: 1;
+    
 }
 
 .info {
     width: auto;
     height: auto;
-    min-width: 30; 
+    min-width: 28; 
 }
 
 
@@ -107,5 +109,14 @@ CTabuleiro {
 .rolavel {
     height: 30;
     padding: 1;
+    margin-right:20;
+
+
+}
+
+.flip {
+    padding: 0;
+    padding-left: 5;
     margin: 0;
+    margin-bottom: 1;
 }

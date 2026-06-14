@@ -60,11 +60,12 @@ class Tabuleiro(App):
 # with vertical determina que haverá uma disposição vertical dos elementos na tela 
         with Vertical():
             # relógio branco
-            yield Static(Text("Black: 10:00", Style(color="#ffffff", bold=True), justify="center"), classes="timeb container")
-
+          
 # with vertical determina que haverá uma disposição horizontal dos elementos na tela 
 
             with Horizontal():
+                yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
+
 
                 with Grid(classes="container tab"):
                     # for para percorrer cada fileira da disposição inical de peças
@@ -103,28 +104,31 @@ class Tabuleiro(App):
                             # coloca a casa no tabuleiro
                             yield casa
 
-                # peças que serão usadas lateralmente ao tabuleiro para promoção
-                with Horizontal():
+
+                with Vertical():
+                    # relógio preto
+                    yield Static(Text("Black: 10:00", Style(color="#ffffff", bold=True, bgcolor="#292626"), justify="center"), classes="timeb container")
+                    # peças que serão usadas lateralmente ao tabuleiro para promoção
                     with Grid(classes="pecas_promo"):
                         for pecas in [DAMA, TORRE, BISPO, CAVALO]:
-                            peca = Cpromo(Text(VAZIO, style=Style(color="white", bold=True)), classes="peca")
+                            peca = Cpromo(Text(VAZIO, style=Style(color="white", bold=True)))
                             peca.cor_fonte = "white"
                             peca.text = pecas
                             self.promo.append(peca)
                             yield peca
 
 
+
                 # Ordem dos lances
-                with Vertical():
-                    with VerticalScroll(classes="rolavel"):
-                        with Collapsible(title="Ordem dos lances:", classes="info"):
-                            yield Label("1. ", classes="label lances")
+
+                with VerticalScroll(classes="rolavel"):
+                    with Collapsible(title="Ordem dos lances:", classes="info"):
+                        yield Label("1. ", classes="label lances")
 
 #                    yield(Static(Text(GAME_OVER, style=Style(color="red", bold=True))))
 #                    yield(Static(Text(WINS, style=Style(color="green", bold=True))))
 
             # relógio preto
-            yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
 
 
             #botão de auto-flip
@@ -311,13 +315,13 @@ class Tabuleiro(App):
             minutos = self.tempoW//60
             segundos = "00" if self.tempoW%60 == 0 else self.tempoW%60
             segundos = f"0{self.tempoW%60}" if self.tempoW%60 < 10 else self.tempoW%60
-            self.query_one('.timew').update(Text(f"White: {minutos}:{segundos} {self.quero_ler}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
+            self.query_one('.timew').update(Text(f"White: {minutos}:{segundos}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
             self.tempoW -=1
         else:
             minutos = self.tempoB//60
             segundos = "00" if self.tempoB%60 == 0 else self.tempoB%60
             segundos = f"0{self.tempoB%60}" if self.tempoB%60 < 10 else self.tempoB%60
-            self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos} {self.quero_ler}", Style(color="#ffffff", bold=True), justify="center"))
+            self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos}", Style(color="#ffffff", bold=True), justify="center"))
             self.tempoB -=1
 
     # função para inverter o tabuleiro
