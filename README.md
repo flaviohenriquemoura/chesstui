@@ -13,8 +13,7 @@ A terminal-based chess game built in Python, with a text user interface powered 
 ## Features
 - [x] Local chess game with board flip
 - [x] Real-time move order display
-- [ ] Bluetooth chess game
-- [ ] Chat (soon
+- [ ] Main menu and checkmante menu
 
 
 ---
