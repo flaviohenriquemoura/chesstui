@@ -120,3 +120,67 @@ CTabuleiro {
     margin: 0;
     margin-bottom: 1;
 }
+
+
+
+
+.conteudo-container {
+    align: center middle;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+}
+
+.card-central {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.75); /* Fundo escuro com opacidade */
+    border: heavy #b58863;
+    padding: 2 4;
+    width: auto;
+    height: auto;
+}
+
+
+.buttons {
+    align: center middle;
+    height: 100%;
+    width: 100%;
+}
+
+#botao {
+    margin-bottom: 2; 
+    margin-left: 15;
+    
+}
+
+
+.tempos {
+    align: center middle;
+    height: auto;
+    width: auto;
+}
+
+
+.tempos Label {
+    content-align: center middle;
+    height: 3; 
+}
+
+
+#tempobranco, #tempopreto {
+    width: 10;
+    margin: 0 1; 
+}
+
+.container-pecas {
+    layout: horizontal;
+    height: auto;
+    width: auto;
+    align: center middle;
+    margin-bottom: 1;
+}
+.peca-fundo{
+    padding: 0;
+    margin:0;
+    padding-left: 15;
+}

@@ -1,10 +1,11 @@
 import chess
 from textual.app import App
-from textual.widgets import Static, Switch, Collapsible, Label
+from textual.widgets import Static, Switch, Collapsible, Label, Button, Input
 from textual.containers import Grid, Horizontal, Vertical, VerticalScroll
 from textual import on, events
 from rich.style import Style
 from rich.text import Text
+from textual.screen import Screen
 import conector
 from piece import *
 
@@ -43,28 +44,41 @@ class CSwitch(Switch):
         message.switch = self
         self.post_message(message)
 
-class Tabuleiro(App):
-    CSS_PATH = "style.tcss"
-    jogo_tab = conector.JogoReal()
-    old_casa = None
-    turn = "#ffffff"
-    tempoW = 600
-    tempoB = 600
-    promo = []
-    w_turn = True
-    could_promo = False
-    promo_move = None
+class CVoltar(Button):
+    class Clique(events.Event):
+        pass
 
-    promo_old_casa = None
-    quero_ler = None
+    def on_click(self, event: events.Click):
+        event.stop()
+        message = self.Clique()
+        message.button = self
+        self.post_message(message)
 
-    rei_preto = None
-    rei_branco = None
-    i_lance = 2
-    ord_lance = ""
-    old_move = None
+class Status(Static):
+    pass
 
-    inverter = False
+class Tabuleiro(Screen):
+    def __init__(self, tempow, tempob, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.jogo_tab = conector.JogoReal()
+        self.old_casa = None
+        self.turn = "#ffffff"
+        self.tempoW = int(tempow)*60
+        self.tempoB = int(tempob)*60
+        self.promo = []
+        self.w_turn = True
+        self.could_promo = False
+        self.promo_move = None
+
+        self.promo_old_casa = None
+
+        self.rei_preto = None
+        self.rei_branco = None
+        self.i_lance = 2
+        self.ord_lance = ""
+        self.old_move = None
+
+        self.inverter = False
 
 
     def compose(self):
@@ -75,7 +89,7 @@ class Tabuleiro(App):
 # with vertical determina que haverá uma disposição horizontal dos elementos na tela 
 
             with Horizontal():
-                yield Static(Text("White: 10:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
+                yield Static(Text(f"White: {self.tempoW//60}:00", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"), classes="timew ")
 
 
                 with Grid(classes="container tab"):
@@ -118,7 +132,7 @@ class Tabuleiro(App):
 
                 with Vertical():
                     # relógio preto
-                    yield Static(Text("Black: 10:00", Style(color="#ffffff", bold=True, bgcolor="#292626"), justify="center"), classes="timeb container")
+                    yield Static(Text(f"Black: {self.tempoB//60}:00", Style(color="#ffffff", bold=True, bgcolor="#292626"), justify="center"), classes="timeb container")
                     # peças que serão usadas lateralmente ao tabuleiro para promoção
                     with Grid(classes="pecas_promo"):
                         for pecas in [DAMA, TORRE, BISPO, CAVALO]:
@@ -136,10 +150,12 @@ class Tabuleiro(App):
                     with Collapsible(title="Ordem dos lances:", classes="info"):
                         yield Label("1. ", classes="label lances")
 
+                    self.status = Status(Text("", style=Style(bold=True)), classes="status")
+                    yield self.status
+
 #                    yield(Static(Text(GAME_OVER, style=Style(color="red", bold=True))))
 #                    yield(Static(Text(WINS, style=Style(color="green", bold=True))))
 
-            # relógio preto
 
 
             #botão de auto-flip
@@ -149,7 +165,14 @@ class Tabuleiro(App):
                 self.switch = CSwitch(Switch(value=False, animate=False, ))
                 self.switch.value = False
                 yield self.switch
+                self.voltar = CVoltar(Text("Sair", Style(bold=True)), id="botao")
+                yield self.voltar
 
+
+
+    @on(CVoltar.Clique)
+    def sair_tabuleiro(self):
+        self.app.switch_screen(TelaInicial())
 
 
     # quando a casa lateral de promoção for clicada, acionará casa_clicada() com a respectiva peça desejada
@@ -183,7 +206,6 @@ class Tabuleiro(App):
                 self.old_casa.text = casa.text
                 casa = self.promo_old_casa[1]
 
-#        self.quero_ler = f"{casa.position}" # estava usando para ler dados na tela
 
         # se a casa antiga selecionada tiver valor nulo, a barra lateral de promoção some
         if self.old_casa == None:
@@ -219,6 +241,8 @@ class Tabuleiro(App):
             # faz o lance no tabuleiro da biblioteca chess
             self.jogo_tab.fazer_lance(move)
 
+            if conector.draws(self.jogo_tab.board):
+                self.query_one(".status").update(Text(DRAW, style=Style(color="white", bold=True)))
             # remove os backgrounds das peças envolvidas com cores de última/atual casa
             self.old_move[0].remove_class("lastcasa") if self.old_move != None else []
             self.old_move[1].remove_class("nowcasa") if self.old_move != None else []
@@ -342,8 +366,6 @@ class Tabuleiro(App):
     # função para inverter o tabuleiro
     @on(CSwitch.Clique)
     def inverte_tabuleiro(self, casa):
-
-
         copy_board = list(self.query(CTabuleiro))
         if copy_board[0].cor_fonte != self.turn:
             return casa
@@ -420,5 +442,52 @@ class Tabuleiro(App):
         self.set_interval(1, self.relogio)
 
 
-app = Tabuleiro()
-app.run()
+class CJogar(Button):
+    class Clique(events.Event):
+        pass
+
+    def on_click(self, event: events.Click):
+        event.stop()
+        message = self.Clique()
+        message.button = self
+        self.post_message(message)
+
+class TelaInicial(Screen):
+
+
+    def compose(self):
+        self.screen.styles.background = "#2e3440"
+
+        with Vertical(classes="buttons conteudo-container"):
+            with Horizontal(classes="container-pecas"):
+                yield Label(Text(REI, Style(bold=True)), classes="peca-fundo")
+                yield Label(Text(REI, Style(bold=True, color="black")), classes="peca-fundo")
+
+            with Vertical(classes="card-central"):
+                self.jogar = CJogar(Text("Jogar", Style(bold=True)), id="botao")
+                yield self.jogar
+                with Horizontal(classes="tempos"):
+                    yield Label("Tempo branco")
+                    yield Input("10", type="integer", id="tempobranco", placeholder="10")
+                    yield Input("10", type="integer", id="tempopreto", placeholder="10")
+                    yield Label("Tempo preto ")
+
+    @on(CJogar.Clique)
+    def jogar_tabuleiro(self):
+        tempow = self.query_one("#tempobranco").value
+        tempob = self.query_one("#tempopreto").value
+        if tempow != "" and tempob != "":
+            self.screen.styles.background = "#000000"
+
+            self.app.switch_screen(Tabuleiro(tempow, tempob))
+
+
+
+class XadrezApp(App):
+    CSS_PATH = "style.tcss"
+    def on_mount(self):
+        self.push_screen(TelaInicial())
+
+if __name__ == "__main__":
+    app = XadrezApp()
+    app.run()
