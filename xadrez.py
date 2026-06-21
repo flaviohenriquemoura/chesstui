@@ -201,10 +201,11 @@ class Tabuleiro(App):
             self.old_casa = None
             is_selected = True
         # se for um movimento válido, trata todos os aspectos de atualização do tabuleiro
-        elif self.jogo_tab.lance_legal(f"{move}"):
+        elif self.jogo_tab.lance_legal(f"{move}") and not(conector.draws(self.jogo_tab.board)):
 
             # faz o lance no tabuleiro da biblioteca chess
             self.jogo_tab.fazer_lance(move)
+
             # remove os backgrounds das peças envolvidas com cores de última/atual casa
             self.old_move[0].remove_class("lastcasa") if self.old_move != None else []
             self.old_move[1].remove_class("nowcasa") if self.old_move != None else []
@@ -232,7 +233,7 @@ class Tabuleiro(App):
 
 
             # inverte o tabuleiro e atualiza a referenciação da casa atual
-            if self.switch.value:
+            if self.switch.value and not self.w_turn:
                 casa = self.inverte_tabuleiro(casa)
 
 
@@ -316,13 +317,13 @@ class Tabuleiro(App):
             segundos = "00" if self.tempoW%60 == 0 else self.tempoW%60
             segundos = f"0{self.tempoW%60}" if self.tempoW%60 < 10 else self.tempoW%60
             self.query_one('.timew').update(Text(f"White: {minutos}:{segundos}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
-            self.tempoW -=1
+            self.tempoW -= 1 if not(conector.draws(self.jogo_tab.board)) else 0
         else:
             minutos = self.tempoB//60
             segundos = "00" if self.tempoB%60 == 0 else self.tempoB%60
             segundos = f"0{self.tempoB%60}" if self.tempoB%60 < 10 else self.tempoB%60
             self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos}", Style(color="#ffffff", bold=True), justify="center"))
-            self.tempoB -=1
+            self.tempoB -= 1 if not(conector.draws(self.jogo_tab.board)) else 0
 
     # função para inverter o tabuleiro
     def inverte_tabuleiro(self, casa):

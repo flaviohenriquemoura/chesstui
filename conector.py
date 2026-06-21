@@ -53,3 +53,16 @@ def number_to_position(linha, coluna):
 
 def position_to_number(position):
     return [(ord(position[0])-96), int(position[1])]
+
+def draws(board):
+    return (
+        board.is_variant_draw() or
+        board.is_insufficient_material() or
+        board.is_stalemate() or
+        board.is_seventyfive_moves() or 
+        board.is_fivefold_repetition() or 
+        board.is_fifty_moves() or
+        board.is_repetition()
+    ) 
+
+        
