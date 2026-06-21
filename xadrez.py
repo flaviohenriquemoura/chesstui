@@ -32,6 +32,17 @@ class Cpromo(Static):
         message.casa = self
         self.post_message(message)
 
+
+class CSwitch(Switch):
+    class Clique(events.Event):
+        pass
+
+    def on_click(self, event: events.Click):
+        event.stop()
+        message = self.Clique()
+        message.switch = self
+        self.post_message(message)
+
 class Tabuleiro(App):
     CSS_PATH = "style.tcss"
     jogo_tab = conector.JogoReal()
@@ -135,8 +146,10 @@ class Tabuleiro(App):
             with Horizontal(classes="container flip"):
 
                 yield Static("Auto-flip:", classes="label")
-                self.switch = Switch(animate=False)
+                self.switch = CSwitch(Switch(value=False, animate=False, ))
+                self.switch.value = False
                 yield self.switch
+
 
 
     # quando a casa lateral de promoção for clicada, acionará casa_clicada() com a respectiva peça desejada
@@ -233,11 +246,13 @@ class Tabuleiro(App):
 
 
             # inverte o tabuleiro e atualiza a referenciação da casa atual
-            if self.switch.value and not self.w_turn:
+            self.turn = "black" if self.turn == "#ffffff" else "#ffffff"
+            if self.switch.value:
                 casa = self.inverte_tabuleiro(casa)
 
 
             # verifica se o rei está em xeque e adiciona/remove background
+            
             if self.jogo_tab.rei_xeque():
                 self.rei_preto.add_class("xeque") if self.w_turn else self.rei_branco.add_class("xeque")
             else:
@@ -281,7 +296,6 @@ class Tabuleiro(App):
             self.query_one(".lances").update(self.ord_lance)
 
             # inverte o turno e a cor das peças que podem ser selecionadas
-            self.turn = "black" if self.turn == "#ffffff" else "#ffffff"
             self.w_turn = False if self.w_turn else True
 
             return True
@@ -326,10 +340,16 @@ class Tabuleiro(App):
             self.tempoB -= 1 if not(conector.draws(self.jogo_tab.board)) else 0
 
     # função para inverter o tabuleiro
+    @on(CSwitch.Clique)
     def inverte_tabuleiro(self, casa):
+
+
         copy_board = list(self.query(CTabuleiro))
+        if copy_board[0].cor_fonte != self.turn:
+            return casa
         n = len(copy_board)
 
+        orig = None
         # se tiver algum rei em xeque, já remove o efeito visual
         self.rei_branco.remove_class("xeque")
         self.rei_preto.remove_class("xeque")
@@ -392,6 +412,7 @@ class Tabuleiro(App):
 
         # volta a ser None para corrigir o bug de duplo clique para seleção
         self.old_casa = None
+
         return orig
 
 
