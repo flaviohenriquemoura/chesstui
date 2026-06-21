@@ -244,6 +244,11 @@ class Tabuleiro(Screen):
             # faz o lance no tabuleiro da biblioteca chess
             self.jogo_tab.fazer_lance(move)
 
+            # Verifica se houve mate
+            if self.jogo_tab.board.is_checkmate():
+                "AAA"
+
+
             if conector.draws(self.jogo_tab.board):
                 self.query_one(".status").update(Text(DRAW, style=Style(color="white", bold=True)))
             # remove os backgrounds das peças envolvidas com cores de última/atual casa
@@ -358,13 +363,13 @@ class Tabuleiro(Screen):
             segundos = "00" if self.tempoW%60 == 0 else self.tempoW%60
             segundos = f"0{self.tempoW%60}" if self.tempoW%60 < 10 else self.tempoW%60
             self.query_one('.timew').update(Text(f"White: {minutos}:{segundos}", Style(color="black", bold=True, bgcolor="#ffffff"), justify="center"))
-            self.tempoW -= 1 if not(conector.draws(self.jogo_tab.board)) else 0
+            self.tempoW -= 1 if not(conector.draws(self.jogo_tab.board)) or not(self.jogo_tab.board.is_checkmate()) else 0
         else:
             minutos = self.tempoB//60
             segundos = "00" if self.tempoB%60 == 0 else self.tempoB%60
             segundos = f"0{self.tempoB%60}" if self.tempoB%60 < 10 else self.tempoB%60
             self.query_one('.timeb').update(Text(f"Black: {minutos}:{segundos}", Style(color="#ffffff", bold=True), justify="center"))
-            self.tempoB -= 1 if not(conector.draws(self.jogo_tab.board)) else 0
+            self.tempoB -= 1 if not(conector.draws(self.jogo_tab.board)) or not(self.jogo_tab.board.is_checkmate()) else 0
 
     # função para inverter o tabuleiro
     @on(CSwitch.Clique)
@@ -484,6 +489,10 @@ class TelaInicial(Screen):
 
             self.app.switch_screen(Tabuleiro(tempow, tempob, True))
 
+
+class TelaDeGameOver(Screen):
+    def compose(self):
+        """"""
 
 
 class XadrezApp(App):

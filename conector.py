@@ -1,7 +1,5 @@
 import chess
 
-
-
 class JogoReal():
     board = chess.Board()      
     lance = None
