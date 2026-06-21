@@ -58,7 +58,7 @@ class Status(Static):
     pass
 
 class Tabuleiro(Screen):
-    def __init__(self, tempow, tempob, *args, **kwargs):
+    def __init__(self, tempow, tempob, newgame, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.jogo_tab = conector.JogoReal()
         self.old_casa = None
@@ -69,7 +69,7 @@ class Tabuleiro(Screen):
         self.w_turn = True
         self.could_promo = False
         self.promo_move = None
-
+        self.newgame = True
         self.promo_old_casa = None
 
         self.rei_preto = None
@@ -186,6 +186,10 @@ class Tabuleiro(Screen):
     #função que captura os cliques no tabuleiro propriamente dito e os trata
     @on(CTabuleiro.Clique)
     def casa_clicada(self, event):
+        if self.newgame:
+            self.jogo_tab.board = chess.Board()
+            self.newgame = False
+
         casa = event.casa
 
         # variável importante para guardar o antepenúltimo movimento, em casos de promoção
@@ -230,7 +234,6 @@ class Tabuleiro(Screen):
 
 
         # se a casa for reselecionada, tira a seleção visual da peça
-
         if self.old_casa == casa:
             casa.remove_class("selected")
             self.old_casa = None
@@ -479,7 +482,7 @@ class TelaInicial(Screen):
         if tempow != "" and tempob != "":
             self.screen.styles.background = "#000000"
 
-            self.app.switch_screen(Tabuleiro(tempow, tempob))
+            self.app.switch_screen(Tabuleiro(tempow, tempob, True))
 
 
 

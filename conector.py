@@ -1,19 +1,5 @@
 import chess
 
-class JogoReal():
-    board = chess.Board()      
-    lance = None
-    def lance_legal(self, move):
-        lance = chess.Move.from_uci(move)
-  
-        if lance in self.board.legal_moves:
-            self.lance = self.board.san(lance)
-            self.board.push(lance)
-            return True
-        return False
-        
-    def rei_xeque(self):
-        return self.board.is_check()
 
 
 class JogoReal():
@@ -38,6 +24,9 @@ class JogoReal():
 
     def rei_xeque(self):
         return self.board.is_check()
+
+    def zerar(self):
+        self.board.clear_board()
 
 def number_to_position(linha, coluna):
         fileiras = "abcdefgh"
